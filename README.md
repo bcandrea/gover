@@ -1,8 +1,7 @@
 # gover - a version detector for Go packages
 
-A simple tool that outputs the value of the constant `Version` in a given Go
-package. If no version is defined, nothing is printed and the tool exit with
-a nonzero status code.
+A simple tool that outputs the value of the constant (or variable) `Version`
+defined in a given Go package.
 
 Example:
 
