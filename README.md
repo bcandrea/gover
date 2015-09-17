@@ -9,7 +9,10 @@ Example:
     $ gover github.com/hashicorp/consul
     0.5.2
 
-The tool is particularly useful during development, e.g. when the version number
+If supplied with a relative path (i.e. starting with `.`), `gover` will treat
+the argument as a directory location and not a Go package name.
+
+This is particularly useful during development, e.g. when the version number
 needs to be included in the compilation output:
 
-    $ go build -o my-tool_$(gover github.com/me/my-tool)
+    $ go build -o my-tool_$(gover .)

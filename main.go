@@ -19,6 +19,12 @@ const Version = "0.1.0"
 // the package with a given name.
 func GetVersion(pkg string) (string, error) {
 	pkgDir := filepath.Join(os.Getenv("GOPATH"), "src", pkg)
+	if strings.HasPrefix(pkg, ".") {
+		var err error
+		if pkgDir, err = filepath.Abs(pkg); err != nil {
+			return "", err
+		}
+	}
 	pkgName := filepath.Base(pkg)
 
 	if _, err := os.Stat(pkgDir); os.IsNotExist(err) {

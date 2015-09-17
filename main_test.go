@@ -59,3 +59,21 @@ func TestVersionInMain(t *testing.T) {
 		t.Errorf("Expected version %s, got %s", expected, got)
 	}
 }
+
+func TestRelativePath(t *testing.T) {
+	v, err := GetVersion("./test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if expected, got := "0.4.2", v; expected != got {
+		t.Errorf("Expected version %s, got %s", expected, got)
+	}
+
+	v, err = GetVersion(".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if expected, got := Version, v; expected != got {
+		t.Errorf("Expected version %s, got %s", expected, got)
+	}
+}
