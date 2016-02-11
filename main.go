@@ -12,32 +12,38 @@ import (
 	"strings"
 )
 
-// The Version of gover.
-const Version = "0.1.0"
+// Version constant for gover.
+const Version = "0.1.1"
 
-// GetVersion returns the value of a constant or variable named "Version" defined in
-// the package with a given name.
-func GetVersion(pkg string) (string, error) {
-	pkgDir := filepath.Join(os.Getenv("GOPATH"), "src", pkg)
+// packageDir returns the actual directory on the file system where a package is located.
+// It accepts a standard package name (e.g. github.com/bcandrea/gover) or a
+// relative path (e.g. ./mypackage) as input.
+func packageDir(pkg string) (string, error) {
+	d := filepath.Join(os.Getenv("GOPATH"), "src", pkg)
 	if strings.HasPrefix(pkg, ".") {
 		var err error
-		if pkgDir, err = filepath.Abs(pkg); err != nil {
-			return "", err
+		if d, err = filepath.Abs(pkg); err != nil {
+			return d, err
 		}
 	}
-	pkgName := filepath.Base(pkg)
-
-	if _, err := os.Stat(pkgDir); os.IsNotExist(err) {
-		return "", err
+	// this check covers non-existing directories
+	if _, err := os.Stat(d); err != nil {
+		return d, err
 	}
+	return d, nil
+}
 
+// syntaxTree retrieves the AST for the given package by merging all its files
+// and constructing a global syntax tree.
+func syntaxTree(pkgDir string) (*ast.File, error) {
 	fset := token.NewFileSet()
 	packages, err := parser.ParseDir(fset, pkgDir, nil, 0)
 	if err != nil {
-		return "", nil
+		return nil, err
 	}
 
 	var pkgAst *ast.Package
+	pkgName := filepath.Base(pkgDir)
 	if p, found := packages["main"]; found {
 		pkgAst = p
 	} else {
@@ -46,11 +52,15 @@ func GetVersion(pkg string) (string, error) {
 		}
 	}
 	if pkgAst == nil {
-		return "", fmt.Errorf("cannot find package main or %s in %s", pkgName, pkgDir)
+		return nil, fmt.Errorf("cannot find package main or %s in %s", pkgName, pkgDir)
 	}
 
-	tree := ast.MergePackageFiles(pkgAst, 0)
+	return ast.MergePackageFiles(pkgAst, 0), nil
+}
 
+// versionFromAST retrieves the version from a constant or variable defined in
+// the abstract syntax tree.
+func versionFromAST(tree *ast.File) (string, error) {
 	for _, decl := range tree.Decls {
 		switch decl.(type) {
 		case *ast.GenDecl:
@@ -78,7 +88,24 @@ func GetVersion(pkg string) (string, error) {
 			}
 		}
 	}
-	return "", fmt.Errorf("no Version object in package %s", pkg)
+	return "", errors.New("no Version declaration found")
+}
+
+// GetVersion returns the value of a constant or variable named "Version" defined in
+// the package with a given name. It accepts a standard package name
+// (e.g. github.com/bcandrea/gover) or a relative path (e.g. ./mypackage) as input.
+func GetVersion(pkg string) (string, error) {
+	pkgDir, err := packageDir(pkg)
+	if err != nil {
+		return "", err
+	}
+
+	tree, err := syntaxTree(pkgDir)
+	if err != nil {
+		return "", err
+	}
+
+	return versionFromAST(tree)
 }
 
 func main() {

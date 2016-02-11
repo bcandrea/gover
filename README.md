@@ -1,6 +1,7 @@
 # gover - a version detector for Go packages
 
 [![Build Status](https://travis-ci.org/bcandrea/gover.svg?branch=master)](https://travis-ci.org/bcandrea/gover)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bcandrea/gover)](https://goreportcard.com/report/github.com/bcandrea/gover)
 
 A simple tool that outputs the value of the constant (or variable) `Version`
 defined in a given Go package.

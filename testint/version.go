@@ -1,4 +1,4 @@
 package testint
 
-// This Version is a number.
+// Version is a number in this case.
 const Version = 12

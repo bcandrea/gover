@@ -1,7 +1,7 @@
 package test
 
-// The name of this package.
+// Name is the name of this package.
 const Name = "test"
 
-// The version of this package.
+// Version is the version of this package.
 const Version = "0.4.2"
