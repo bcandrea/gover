@@ -1,6 +1,6 @@
 # gover - a version detector for Go packages
-
 [![Build Status](https://travis-ci.org/bcandrea/gover.svg?branch=master)](https://travis-ci.org/bcandrea/gover)
+[![Coverage Status](https://coveralls.io/repos/github/bcandrea/gover/badge.svg?branch=master)](https://coveralls.io/github/bcandrea/gover?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bcandrea/gover)](https://goreportcard.com/report/github.com/bcandrea/gover)
 
 A simple tool that outputs the value of the constant (or variable) `Version`

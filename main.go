@@ -7,13 +7,14 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
 // Version constant for gover.
-const Version = "0.1.1"
+const Version = "0.1.2"
 
 // packageDir returns the actual directory on the file system where a package is located.
 // It accepts a standard package name (e.g. github.com/bcandrea/gover) or a
@@ -108,23 +109,30 @@ func GetVersion(pkg string) (string, error) {
 	return versionFromAST(tree)
 }
 
-func main() {
-	showVersion := flag.Bool("v", false, "display version")
-	flag.Parse()
+// run implements the behaviour of the gover command line application.
+func run(args []string, outW, errW io.Writer) int {
+	cmdLine := flag.NewFlagSet(args[0], flag.ExitOnError)
+	showVersion := cmdLine.Bool("v", false, "display version")
+	cmdLine.Parse(args[1:])
 
 	if *showVersion {
-		fmt.Println("gover version", Version)
-		os.Exit(0)
+		fmt.Fprintln(outW, "gover version", Version)
+		return 0
 	}
 
-	if len(flag.Args()) < 1 {
-		fmt.Fprintln(os.Stderr, "usage: gover <package>")
-		os.Exit(1)
+	if len(cmdLine.Args()) < 1 {
+		fmt.Fprintln(errW, "usage: gover <package>")
+		return 1
 	}
-	ver, err := GetVersion(flag.Arg(0))
+	ver, err := GetVersion(cmdLine.Arg(0))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "gover:", err)
-		os.Exit(2)
+		fmt.Fprintln(errW, "gover:", err)
+		return 2
 	}
-	fmt.Println(ver)
+	fmt.Fprintln(outW, ver)
+	return 0
+}
+
+func main() {
+	os.Exit(run(os.Args, os.Stdout, os.Stderr))
 }
